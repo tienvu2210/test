@@ -1,0 +1,3 @@
+[submodule "intellj-bazel-test/bazel-deps"]
+	path = intellj-bazel-test/bazel-deps
+	url = https://github.com/johnynek/bazel-deps
