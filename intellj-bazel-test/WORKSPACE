@@ -1,0 +1,98 @@
+workspace(
+    name = "banana",
+    # managed_directories = {
+    #     "@npm": [
+    #         "third_party/node/node_modules",
+    #     ],  # managed by rules_nodejs
+    # },
+)
+
+# Load the base Bazel rules
+# This includes basic rules such as rules_scala, rules_proto, etc...
+# This has to be loaded first because repositories are not available within the
+# macro tree they are loaded in. See https://github.com/bazelbuild/bazel/issues/1550
+# load("//third_party/bazel_workspace:bazel_repositories.bzl", "bazel_repositories")
+
+# bazel_repositories()
+
+# # Load in the previously imported rules' dependencies.
+# load("//third_party/bazel_workspace:repository_dependencies.bzl", "repository_dependencies")
+
+# repository_dependencies()
+
+# # Load in our setup dependencies (node modules, pip, docker, etc)
+# load("//third_party/bazel_workspace:repository_setup.bzl", "repository_setup")
+
+# repository_setup()
+
+# load("@common_pip_parsed_deps//:requirements.bzl", install_common_deps = "install_deps")
+# load("@data_pip_parsed_deps//:requirements.bzl", install_data_deps = "install_deps")
+
+# # Initialize repositories for all packages in asana2/third_party/python/common/requirements3.txt
+# install_common_deps()
+
+# # Initialize repositories for all packages in asana2/third_party/python/data/requirements.txt
+# install_data_deps()
+
+# # # Load Asana third_party repositories
+# # # Contains our custom repository setup.
+# load("//third_party/bazel_workspace:asana2_repositories.bzl", "asana2_repositories")
+
+# asana2_repositories()
+
+# register_toolchains(
+#     "@asana2//tools/build_rules:py_mac_toolchain",
+# )
+
+# WORKSPACE
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+skylib_version = "1.0.3"
+http_archive(
+    name = "bazel_skylib",
+    sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
+    type = "tar.gz",
+    url = "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/{}/bazel-skylib-{}.tar.gz".format(skylib_version, skylib_version),
+)
+
+rules_scala_version = "e7a948ad1948058a7a5ddfbd9d1629d6db839933"
+http_archive(
+    name = "io_bazel_rules_scala",
+    sha256 = "76e1abb8a54f61ada974e6e9af689c59fd9f0518b49be6be7a631ce9fa45f236",
+    strip_prefix = "rules_scala-%s" % rules_scala_version,
+    type = "zip",
+    url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
+)
+
+# Stores Scala version and other configuration
+# 2.12 is a default version, other versions can be use by passing them explicitly:
+# scala_config(scala_version = "2.11.12")
+load("@io_bazel_rules_scala//:scala_config.bzl", "scala_config")
+scala_config()
+
+load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")
+scala_repositories()
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+rules_proto_dependencies()
+rules_proto_toolchains()
+
+load("@io_bazel_rules_scala//scala:toolchains.bzl", "scala_register_toolchains")
+scala_register_toolchains()
+
+# optional: setup ScalaTest toolchain and dependencies
+load("@io_bazel_rules_scala//testing:scalatest.bzl", "scalatest_repositories", "scalatest_toolchain")
+scalatest_repositories()
+scalatest_toolchain()
+
+load("//3rdparty:workspace.bzl", "maven_dependencies")
+maven_dependencies()
+
+scala_repositories((
+    "2.12.8",
+    {
+      "scala_compiler": "f34e9119f45abd41e85b9e121ba19dd9288b3b4af7f7047e86dc70236708d170",
+      "scala_library": "321fb55685635c931eba4bc0d7668349da3f2c09aee2de93a70566066ff25c28",
+      "scala_reflect": "4d6405395c4599ce04cea08ba082339e3e42135de9aae2923c9f5367e957315a"
+    }
+))
